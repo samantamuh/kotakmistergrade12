@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Game Kotak Misteri: Teks Prosedur Kelas IX (Standar Dinas Pendidikan)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- html2pdf.js CDN untuk Ekspor PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .box-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .box-card:hover:not(.disabled) {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 25px -5px rgba(99, 102, 241, 0.4);
+        }
+        .animate-pulse-fast {
+            animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        /* Safari Dropdown & Input Fixes */
+        select, input, textarea {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'><path d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 12px;
+            padding-right: 2.2rem !important;
+        }
+    </style>
+</head>
+<body class="text-slate-100 flex flex-col min-h-screen">
+
+    <!-- Header Section -->
+    <header class="sticky top-0 z-30 glass-card border-b border-slate-700/50 px-4 py-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid font-bold text-white text-xl fa-box-archive"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+                        KOTAK MISTERI TEKS PROSEDUR
+                    </h1>
+                    <p class="text-xs text-slate-400">Bahasa Indonesia Kelas IX • Standar Asesmen Dinas Pendidikan</p>
+                </div>
+            </div>
+
+            <!-- Stats & Timer Bar -->
+            <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+                <!-- Countdown Timer Badge -->
+                <div id="timer-container" class="bg-slate-800/90 px-3.5 py-1.5 rounded-xl border border-rose-500/40 flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-rose-400 animate-pulse"></i>
+                    <div>
+                        <div class="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">Sisa Waktu</div>
+                        <div id="timer-display" class="text-base font-black text-rose-400 tracking-wider">40:00</div>
+                    </div>
+                </div>
+
+                <!-- Total Score (0-100) -->
+                <div class="bg-slate-800/90 px-3.5 py-1.5 rounded-xl border border-amber-500/40 flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-400"></i>
+                    <div>
+                        <div class="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">Total Nilai</div>
+                        <div class="flex items-baseline gap-1">
+                            <span id="converted-score" class="text-lg font-extrabold text-amber-400">0</span>
+                            <span class="text-[10px] text-slate-400">/ 100 Poin</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="bg-slate-800/90 px-3.5 py-1.5 rounded-xl border border-indigo-500/40 flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-indigo-400"></i>
+                    <div>
+                        <div class="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">Progres Kotak</div>
+                        <div id="progress-text" class="text-sm font-bold text-indigo-300">0 / 25</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <button onclick="openRulesModal()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition" title="Aturan Permainan">
+                    <i class="fa-solid fa-circle-info text-base"></i>
+                </button>
+                <button onclick="resetGameConfirm()" class="p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 transition" title="Reset Permainan">
+                    <i class="fa-solid fa-rotate-right text-base"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-5">
+
+        <!-- Student Identity Form Card Banner -->
+        <div class="glass-card rounded-2xl p-4 border border-indigo-500/30 shadow-lg bg-gradient-to-r from-slate-900/90 via-indigo-950/30 to-slate-900/90">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                        <i class="fa-solid fa-user-graduate text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-200">Identitas Peserta Didik</h2>
+                        <p class="text-[11px] text-slate-400">Isi Nama dan Kelas sebelum mengunduh Laporan Ujian Dinas Pendidikan.</p>
+                    </div>
+                </div>
+
+                <!-- Input Fields for Nama & Kelas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full md:w-auto md:min-w-[420px]">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">Nama Lengkap:</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                            <input type="text" id="header-student-name" oninput="syncStudentInfo()" placeholder="Masukkan Nama Siswa..." 
+                                class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-wider mb-1">Kelas / No. Absen:</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-school absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                            <input type="text" id="header-student-class" oninput="syncStudentInfo()" placeholder="Contoh: IX-A / 14" 
+                                class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dinas Pendidikan Question Types & Point Distribution -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div class="glass-card rounded-xl p-3 flex items-center gap-2.5 border-l-4 border-indigo-500">
+                <span class="text-xl">🅰️</span>
+                <div>
+                    <div class="text-xs font-bold text-slate-200">PG Biasa</div>
+                    <div class="text-[10px] text-slate-400">10 Soal • 3 Poin/Kotak</div>
+                </div>
+            </div>
+            <div class="glass-card rounded-xl p-3 flex items-center gap-2.5 border-l-4 border-emerald-500">
+                <span class="text-xl">☑️</span>
+                <div>
+                    <div class="text-xs font-bold text-slate-200">PG Kompleks</div>
+                    <div class="text-[10px] text-slate-400">5 Soal • 4 Poin/Kotak</div>
+                </div>
+            </div>
+            <div class="glass-card rounded-xl p-3 flex items-center gap-2.5 border-l-4 border-cyan-500">
+                <span class="text-xl">🔀</span>
+                <div>
+                    <div class="text-xs font-bold text-slate-200">Menjodohkan</div>
+                    <div class="text-[10px] text-slate-400">3 Soal • 5 Poin/Kotak</div>
+                </div>
+            </div>
+            <div class="glass-card rounded-xl p-3 flex items-center gap-2.5 border-l-4 border-amber-500">
+                <span class="text-xl">✏️</span>
+                <div>
+                    <div class="text-xs font-bold text-slate-200">Isian Singkat</div>
+                    <div class="text-[10px] text-slate-400">4 Soal • 5 Poin/Kotak</div>
+                </div>
+            </div>
+            <div class="glass-card rounded-xl p-3 flex items-center gap-2.5 border-l-4 border-purple-500">
+                <span class="text-xl">📝</span>
+                <div>
+                    <div class="text-xs font-bold text-slate-200">Uraian HOTS</div>
+                    <div class="text-[10px] text-slate-400">3 Soal • 5 Poin/Kotak</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mystery Box Grid (5x5) -->
+        <div class="glass-card p-4 sm:p-6 rounded-2xl shadow-2xl border border-slate-700/50">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-md font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-indigo-400"></i> Papan Kotak Misteri (Total 100 Poin)
+                </h2>
+                <span class="text-xs text-slate-400 italic">Pilih kotak untuk membuka soal dan kumpulkan poin!</span>
+            </div>
+            <div id="box-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+                <!-- Boxes generated by JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Question Modal -->
+    <div id="question-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+        <div class="glass-card w-full max-w-2xl rounded-2xl border border-slate-700 shadow-2xl overflow-hidden my-8 transform transition-all">
+            
+            <!-- Modal Header -->
+            <div id="modal-header-bg" class="px-6 py-4 bg-slate-800/90 border-b border-slate-700 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span id="question-type-icon" class="text-2xl">📦</span>
+                    <div>
+                        <span id="question-box-number" class="text-xs font-extrabold uppercase tracking-widest text-indigo-400">KOTAK #1</span>
+                        <h3 id="question-type-title" class="text-sm font-bold text-slate-200">Jenis Soal</h3>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="question-points-badge" class="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                        BOBOT: 3 POIN
+                    </span>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+                
+                <!-- Question Display -->
+                <div class="space-y-2">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Pertanyaan / Soal:</span>
+                    <div id="question-text" class="text-base sm:text-lg font-medium text-slate-100 leading-relaxed bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                        Teks soal...
+                    </div>
+                </div>
+
+                <!-- Dynamic Input Container -->
+                <div id="answer-container" class="space-y-4">
+                    <!-- Dynamic Answer Components -->
+                </div>
+
+                <!-- AI Evaluation Report Container (for Uraian) -->
+                <div id="ai-evaluation-report" class="hidden space-y-4 p-4 rounded-xl bg-slate-900/90 border border-purple-500/30">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-robot text-purple-400 text-lg"></i>
+                            <span class="font-bold text-sm text-purple-300">Laporan Evaluasi Rubrik AI (Dinas Pendidikan)</span>
+                        </div>
+                        <span id="ai-score-percentage" class="text-lg font-black text-amber-400">0%</span>
+                    </div>
+
+                    <!-- Rubrik Breakdown -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div class="p-2 bg-slate-800/80 rounded border border-slate-700/50 flex justify-between">
+                            <span class="text-slate-400">A. Ketepatan Isi:</span>
+                            <span id="score-isi" class="font-semibold text-indigo-300">0%</span>
+                        </div>
+                        <div class="p-2 bg-slate-800/80 rounded border border-slate-700/50 flex justify-between">
+                            <span class="text-slate-400">B. Pemahaman Konsep:</span>
+                            <span id="score-konsep" class="font-semibold text-indigo-300">0%</span>
+                        </div>
+                        <div class="p-2 bg-slate-800/80 rounded border border-slate-700/50 flex justify-between">
+                            <span class="text-slate-400">C. Kelengkapan Unsur:</span>
+                            <span id="score-kelengkapan" class="font-semibold text-indigo-300">0%</span>
+                        </div>
+                        <div class="p-2 bg-slate-800/80 rounded border border-slate-700/50 flex justify-between">
+                            <span class="text-slate-400">D. Ketepatan Alasan:</span>
+                            <span id="score-alasan" class="font-semibold text-indigo-300">0%</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Feedback Note -->
+                    <div id="ai-feedback-text" class="text-xs text-slate-300 italic bg-slate-800/40 p-2.5 rounded border border-slate-700/40">
+                        Ulasan AI...
+                    </div>
+                </div>
+
+                <!-- Result Alert Box -->
+                <div id="result-feedback" class="hidden p-4 rounded-xl text-center space-y-1">
+                    <div id="result-title" class="font-extrabold text-lg">🎉 JAWABAN BENAR!</div>
+                    <div id="result-points-change" class="text-sm font-bold">+3 Poin</div>
+                    <div id="result-rationale" class="text-xs text-slate-300 mt-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800 text-left">
+                        Penjelasan rasional...
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 bg-slate-900/90 border-t border-slate-800 flex justify-end gap-3">
+                <button id="btn-submit-answer" onclick="submitCurrentAnswer()" class="px-5 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Kirim Jawaban
+                </button>
+                <button id="btn-close-modal" onclick="closeModal()" class="hidden px-5 py-2.5 rounded-xl font-bold text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+                    Tutup Kotak
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="glass-card w-full max-w-lg rounded-2xl border border-slate-700 p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-scroll text-indigo-400"></i> Aturan Permainan Standar Dinas Pendidikan
+                </h3>
+                <button onclick="closeRulesModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="text-xs text-slate-300 space-y-3 leading-relaxed">
+                <p><strong>1. Durasi Waktu:</strong> Anda memiliki total waktu <strong>40 Menit</strong> untuk menyelesaikan 25 kotak misteri.</p>
+                <p><strong>2. Pembobotan Poin (Total 100 Poin):</strong>
+                    <ul class="list-disc pl-5 space-y-1 mt-1 text-slate-400">
+                        <li><strong>🅰️ PG Biasa (10 Soal):</strong> 3 Poin / Soal (Total 30 Poin)</li>
+                        <li><strong>☑️ PG Kompleks (5 Soal):</strong> 4 Poin / Soal (Total 20 Poin)</li>
+                        <li><strong>🔀 Menjodohkan (3 Soal):</strong> 5 Poin / Soal (Total 15 Poin)</li>
+                        <li><strong>✏️ Isian Singkat (4 Soal):</strong> 5 Poin / Soal (Total 20 Poin)</li>
+                        <li><strong>📝 Uraian HOTS (3 Soal):</strong> 5 Poin / Soal (Total 15 Poin)</li>
+                    </ul>
+                </p>
+                <p><strong>3. Tampilan Skor Kotak:</strong> Setiap kartu kotak memperlihatkan jumlah poin yang dapat diperoleh. Setelah dijawab, perolehan skor langsung ditampilkan pada kotak terkait.</p>
+                <p><strong>4. Unduh Laporan PDF:</strong> Hasil ujian dapat diunduh sebagai berkas bukti belajar lengkap dengan identitas Nama dan Kelas.</p>
+            </div>
+            <div class="pt-2 flex justify-end">
+                <button onclick="closeRulesModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 font-bold text-xs text-white rounded-xl">
+                    Saya Mengerti
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory / Summary Modal -->
+    <div id="victory-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-lg overflow-y-auto">
+        <div class="glass-card w-full max-w-md rounded-2xl border border-amber-500/30 p-6 text-center space-y-4 my-8">
+            <div class="w-14 h-14 mx-auto rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-3xl text-amber-400 shadow-xl">
+                🏆
+            </div>
+            <div>
+                <h2 id="victory-title-text" class="text-2xl font-black text-slate-100">Sesi Ujian Selesai!</h2>
+                <p id="victory-sub-text" class="text-xs text-slate-400 mt-1">Seluruh 25 kotak misteri telah diselesaikan.</p>
+            </div>
+
+    <!-- Offscreen Container for Cross-Browser PDF Generation (Safari & Chrome safe) -->
+    <div id="pdf-container-wrapper" style="position: fixed; top: 0; left: 0; width: 800px; opacity: 0; pointer-events: none; z-index: -9999;">
+        <div id="pdf-report-template" class="p-8 bg-white text-slate-900 font-sans leading-relaxed text-xs">
+            <!-- PDF Content dynamically populated via JS -->
+        </div>
+    </div>
+
+    <script>
+        // Database 25 Soal Teks Prosedur Berdasarkan Standar Dinas Pendidikan
+        // Total Bobot Poin: (10 PG x 3) + (5 PGK x 4) + (3 MJD x 5) + (4 IS x 5) + (3 UR x 5) = 30 + 20 + 15 + 20 + 15 = 100 POIN
+        const questionDatabase = [
+            {
+                id: 1,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Tujuan utama dari pembuatan teks prosedur adalah...',
+                options: [
+                    'A. Menghibur pembaca dengan cerita petualangan yang menarik',
+                    'B. Memberikan petunjuk langkah demi langkah untuk melakukan atau membuat sesuatu secara sistematis',
+                    'C. Menyampaikan pendapat pribadi penulis mengenai suatu isu sosial',
+                    'D. Menggambarkan keindahan suatu objek secara rinci'
+                ],
+                answer: 1,
+                rationale: 'Teks prosedur bertujuan untuk memberikan panduan langkah demi langkah agar pembaca dapat mencapai hasil yang diinginkan.'
+            },
+            {
+                id: 2,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Bagian struktur teks prosedur yang menguraikan maksud serta hasil akhir yang ingin dicapai dinamakan...',
+                options: [
+                    'A. Alat dan Bahan',
+                    'B. Langkah-Langkah',
+                    'C. Tujuan',
+                    'D. Penutup'
+                ],
+                answer: 2,
+                rationale: 'Bagian Tujuan merupakan pengantar yang menjelaskan maksud serta hasil akhir yang akan didapatkan dari prosedur.'
+            },
+            {
+                id: 3,
+                points: 5,
+                type: 'MJD',
+                typeName: 'Menjodohkan',
+                question: 'Jodohkanlah struktur teks prosedur di Kolom Kiri dengan deskripsi fungsinya yang tepat di Kolom Kanan!',
+                pairs: [
+                    { prompt: 'Tujuan', match: 'Penjelasan awal mengenai hasil akhir' },
+                    { prompt: 'Material', match: 'Daftar alat dan bahan yang diperlukan' },
+                    { prompt: 'Langkah-Langkah', match: 'Urutan kronologis tindakan yang dilakukan' }
+                ],
+                allOptions: [
+                    'Penjelasan awal mengenai hasil akhir',
+                    'Daftar alat dan bahan yang diperlukan',
+                    'Urutan kronologis tindakan yang dilakukan',
+                    'Simpulan dan ucapan selamat menikmati hasil'
+                ],
+                rationale: 'Tujuan berisi pengantar hasil, Material berisikan alat/bahan, dan Langkah-langkah berisi urutan kronologis kegiatan.'
+            },
+            {
+                id: 4,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Manakah di bawah ini yang MERUPAKAN contoh kalimat imperatif yang tepat dalam teks prosedur?',
+                options: [
+                    'A. Ibu sedang merebus air di dapur.',
+                    'B. Rebuslah air hingga mendidih sebelum memasukkan mi!',
+                    'C. Air mendidih pada suhu 100 derajat Celsius.',
+                    'D. Mengapa air harus direbus terlebih dahulu?'
+                ],
+                answer: 1,
+                rationale: 'Kalimat B merupakan kalimat imperatif karena mengarahkan tindakan secara langsung dengan imbuhan -lah dan tanda seru (!).'
+            },
+            {
+                id: 5,
+                points: 4,
+                type: 'PGK',
+                typeName: 'PG Kompleks',
+                question: 'Pilihlah DUA atau LEBIH kalimat di bawah ini yang tergolong ke dalam KALIMAT IMPERATIF (Perintah/Instruksi)! (Centang semua yang benar)',
+                options: [
+                    'Tutup rapat-rapat wadah tersebut agar tidak tercemar udara luar!',
+                    'Saya menyukai aroma kopi hangat di pagi hari.',
+                    'Aduk adonan hingga merata dan tidak ada lumpur tepung!',
+                    'Apakah pisau ini cukup tajam untuk memotong daging?'
+                ],
+                correctIndices: [0, 2],
+                rationale: 'Kalimat 1 dan 3 menggunakan bentuk instruksi perintah langsung (Tutup rapat-rapat! & Aduk adonan!).'
+            },
+            {
+                id: 6,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Perhatikan kalimat: "Tambahkan 2 sendok makan gula, KEMUDIAN aduk hingga larut." Kata "kemudian" berfungsi sebagai...',
+                options: [
+                    'A. Konjungsi temporal (penghubung urutan waktu)',
+                    'B. Adverbia cara',
+                    'C. Kata kerja pasif',
+                    'D. Kata benda konkret'
+                ],
+                answer: 0,
+                rationale: 'Kata "kemudian", "lalu", "setelah itu" adalah konjungsi temporal yang menghubungkan tahapan kronologis.'
+            },
+            {
+                id: 7,
+                points: 5,
+                type: 'MJD',
+                typeName: 'Menjodohkan',
+                question: 'Jodohkanlah kaidah kebahasaaan teks prosedur di Kolom Kiri dengan contoh kata/frasa yang sesuai di Kolom Kanan!',
+                pairs: [
+                    { prompt: 'Konjungsi Temporal', match: 'Selanjutnya, lalu, setelah itu' },
+                    { prompt: 'Kata Kerja Imperatif', match: 'Tuangkan, haluskan, tiriskan' },
+                    { prompt: 'Keterangan Ukuran', match: '500 gram, 15 menit, 2 sdm' }
+                ],
+                allOptions: [
+                    'Selanjutnya, lalu, setelah itu',
+                    'Tuangkan, haluskan, tiriskan',
+                    '500 gram, 15 menit, 2 sdm',
+                    'Sangat indah, menawan, mempesona'
+                ],
+                rationale: 'Konjungsi temporal menyatakan waktu/urutan, imperatif adalah perintah, dan keterangan ukuran menyatakan kuantitas terukur.'
+            },
+            {
+                id: 8,
+                points: 4,
+                type: 'PGK',
+                typeName: 'PG Kompleks',
+                question: 'Pilihlah DUA kalimat di bawah ini yang memuat KETERANGAN UKURAN AKURAT/SPESIFIK! (Centang semua yang sesuai)',
+                options: [
+                    'Rebus adonan telur selama 10 menit dengan api sedang.',
+                    'Tambahkan garam secukupnya saja sesuai selera.',
+                    'Campurkan 250 gram tepung terigu ke dalam adonan.',
+                    'Potong-potonglah buah sampai dirasa cukup.'
+                ],
+                correctIndices: [0, 2],
+                rationale: 'Kalimat 1 ("10 menit dengan api sedang") dan kalimat 3 ("250 gram") memiliki ukuran akurat dan terukur.'
+            },
+            {
+                id: 9,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Manakah kalimat berikut yang menggunakan keterangan (adverbia) cara dengan tepat?',
+                options: [
+                    'A. Masukkan adonan ke dalam oven.',
+                    'B. Adok adonan secara perlahan hingga mengembang sempurna.',
+                    'C. Siapkan 3 butir telur ayam.',
+                    'D. Mengapa oven harus dipanaskan terlebih dahulu?'
+                ],
+                answer: 1,
+                rationale: 'Frasa "secuali perlahan hingga mengembang sempurna" menjelaskan adverbia cara pelaksanaan instruksi.'
+            },
+            {
+                id: 10,
+                points: 5,
+                type: 'UR',
+                typeName: 'Uraian HOTS',
+                question: 'Perhatikan langkah acak cuci tangan berikut:\n(1) Bilas dengan air mengalir.\n(2) Basahi tangan dengan air bersih.\n(3) Gosok sabun ke telapak tangan selama 20 detik.\n(4) Keringkan dengan lap bersih.\nUrutkan langkah-langkah cuci tangan tersebut secara logis dan jelaskan alasannya!',
+                idealAnswer: 'Urutan logis: (2) - (3) - (1) - (4). Tangan dibasahi terlebih dahulu agar sabun berbusa, lalu digosok sabun untuk membunuh kuman, dibilas air mengalir untuk membuang kotoran, dan dikeringkan agar tetap bersih.',
+                keywords: ['2', '3', '1', '4', 'basahi', 'sabun', 'bilas', 'keringkan', 'logis', 'kuman'],
+                rationale: 'Urutan kronologis yang logis menjamin efektivitas dan kebersihan tindakan.'
+            },
+            {
+                id: 11,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Struktur teks prosedur secara urut dan lengkap pada panduan pembuatan resep makanan terdiri dari...',
+                options: [
+                    'A. Orientasi, Komplikasi, Resolusi',
+                    'B. Tesis, Argumen, Penegasan Ulang',
+                    'C. Tujuan, Material (Alat & Bahan), Langkah-Langkah, Penutup',
+                    'D. Pernyataan Umum, Deretan Penjelas, Interpretasi'
+                ],
+                answer: 2,
+                rationale: 'Struktur baku prosedur pembuatan mencakup Tujuan, Material (Alat & Bahan), Langkah-langkah, dan Penutup.'
+            },
+            {
+                id: 12,
+                points: 5,
+                type: 'MJD',
+                typeName: 'Menjodohkan',
+                question: 'Jodohkanlah jenis teks prosedur di Kolom Kiri dengan contoh judulnya di Kolom Kanan!',
+                pairs: [
+                    { prompt: 'Prosedur Membuat Sesuatu', match: 'Cara Membuat Nasi Goreng Spesial' },
+                    { prompt: 'Prosedur Menggunakan Alat', match: 'Cara Mengoperasikan Mesin Cuci' },
+                    { prompt: 'Prosedur Melakukan Aktivitas', match: 'Cara Mendaftar Kartu Perpustakaan' }
+                ],
+                allOptions: [
+                    'Cara Membuat Nasi Goreng Spesial',
+                    'Cara Mengoperasikan Mesin Cuci',
+                    'Cara Mendaftar Kartu Perpustakaan',
+                    'Kisah Petualangan di Hutan Belantara'
+                ],
+                rationale: 'Resep tergolong membuat sesuatu, panduan alat tergolong menggunakan alat, dan pendaftaran tergolong aktivitas.'
+            },
+            {
+                id: 13,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Bacalah petunjuk ini: "Jangan menekan tombol Power saat lampu indikator masih berkedip merah." Maksud implisit dari larangan tersebut adalah...',
+                options: [
+                    'A. Tombol Power otomatis rusak jika berwarna merah',
+                    'B. Perangkat sedang dalam proses pengolahan data sehingga pemutusan daya dapat merusak sistem',
+                    'C. Lampu indikator merah menandakan alat kehabisan baterai',
+                    'D. Pengguna disarankan segera membuang alat tersebut'
+                ],
+                answer: 1,
+                rationale: 'Lampu indikator berkedip menandakan proses internal sedang berlangsung, mematikannya dapat mengganggu data/sistem.'
+            },
+            {
+                id: 14,
+                points: 4,
+                type: 'PGK',
+                typeName: 'PG Kompleks',
+                question: 'Manakah pernyataan yang BENAR mengenai ciri kebahasaan teks prosedur? (Centang semua opsi yang benar)',
+                options: [
+                    'Banyak menggunakan kata kerja imperatif (perintah).',
+                    'Memuat konjungsi temporal untuk menunjukkan urutan langkah.',
+                    'Menggunakan bahasa kiasan dan puisi yang sarat makna implisit.',
+                    'Menggunakan kata keterangan untuk memberi batasan ukuran dan waktu.'
+                ],
+                correctIndices: [0, 1, 3],
+                rationale: 'Ciri kebahasaan teks prosedur meliputi kalimat imperatif, konjungsi temporal, dan kata keterangan ukuran.'
+            },
+            {
+                id: 15,
+                points: 5,
+                type: 'IS',
+                typeName: 'Isian Singkat',
+                question: 'Kalimat yang mengandung perintah, instruksi, atau larangan dalam teks prosedur dinamakan kalimat ______.',
+                acceptedAnswers: ['imperatif', 'kalimat imperatif', 'perintah'],
+                rationale: 'Kalimat imperatif adalah kalimat perintah yang mengarahkan tindakan langsung pembaca.'
+            },
+            {
+                id: 16,
+                points: 5,
+                type: 'IS',
+                typeName: 'Isian Singkat',
+                question: 'Kata penghubung yang menyatakan urutan waktu seperti "selanjutnya", "kemudian", dan "setelah itu" dinamakan konjungsi ______.',
+                acceptedAnswers: ['temporal', 'konjungsi temporal'],
+                rationale: 'Konjungsi temporal menandai hubungan kronologis antar-langkah.'
+            },
+            {
+                id: 17,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Bacalah teks langkah berikut:\n(1) Panaskan minyak. (2) Tumis bumbu hingga harum. (3) Angkat dan hidangkan. (4) Masukkan bahan utama dan masak hingga matang.\nKelemahan utama dari langkah di atas adalah...',
+                options: [
+                    'A. Tidak menggunakan kata kerja',
+                    'B. Urutan langkah tidak logis karena menyajikan hidangan sebelum bahan dimasukkan',
+                    'C. Bahasa yang digunakan terlalu rumit',
+                    'D. Tidak dilengkapi daftar alat'
+                ],
+                answer: 1,
+                rationale: 'Langkah (3) menyajikan hidangan mendahului langkah (4) memasak bahan utama, sehingga kronologinya tidak sistematis.'
+            },
+            {
+                id: 18,
+                points: 4,
+                type: 'PGK',
+                typeName: 'PG Kompleks',
+                question: 'Evaluasilah fungsi dari penggunaan takaran terukur (seperti "250 gram tepung", "15 menit") dalam teks prosedur! (Centang semua yang benar)',
+                options: [
+                    'Memberikan kepastian ukuran bagi pembaca agar hasil konsisten.',
+                    'Mencegah kegagalan proses pembuatan terutama bagi pemula.',
+                    'Memperpanjang durasi membaca teks prosedur.',
+                    'Memberikan instruksi yang jelas dan terukur.'
+                ],
+                correctIndices: [0, 1, 3],
+                rationale: 'Takaran spesifik memberikan kepastian ukuran, kejelasan instruksi, dan mencegah kegagalan.'
+            },
+            {
+                id: 19,
+                points: 5,
+                type: 'UR',
+                typeName: 'Uraian HOTS',
+                question: 'Mengapa penggunaan takaran spesifik (seperti "250 gram tepung") jauh lebih baik daripada kata "secukupnya" dalam sebuah resep bagi pemula? Jelaskan!',
+                idealAnswer: 'Takaran spesifik memberikan kepastian ukuran yang akurat sehingga pembaca (terutama pemula) dapat menghasilkan rasa dan kualitas masakan yang konsisten serta menghindari kegagalan adonan.',
+                keywords: ['spesifik', 'konsisten', 'akurat', 'pemula', 'gagal', 'takaran', 'pasti', 'kualitas'],
+                rationale: 'Takaran terukur menjamin kepastian langkah serta kesuksesan hasil akhir bagi pemula.'
+            },
+            {
+                id: 20,
+                points: 5,
+                type: 'UR',
+                typeName: 'Uraian HOTS',
+                question: 'Perhatikan panduan ini: "Cara Menyeduh Kopi: Masukkan kopi. Tuangkan air panas. Aduk dan minum." Evaluasilah kelemahan panduan ini dan berikan perbaikan langkah yang lebih rinci dan aman!',
+                idealAnswer: 'Kelemahan: Terlalu singkat, tidak ada takaran, dan berbahaya (air mendidih langsung diminum). Perbaikan: Sebutkan takaran kopi (1-2 sdm), gunakan air panas suhu ~90°C, aduk perlahan, lalu tunggu 2-3 menit hingga ampas mengendap sebelum diminum.',
+                keywords: ['takaran', 'keamanan', 'air panas', 'aduk', 'ampas', 'suhu', 'tunggu', 'rinci', 'bahaya'],
+                rationale: 'Teks prosedur yang baik harus memperhatikan kejelasan takaran serta aspek keselamatan kerja.'
+            },
+            {
+                id: 21,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Cermati dua teks berikut:\nTeks A: "Tuangkan 200 ml air. Selanjutnya, tambahkan 1 sdm gula. Aduk hingga larut."\nTeks B: "Air dituangkan sebanyak 200 ml. Gula ditambahkan satu sendok. Pengadukan dilakukan sampai larut."\nManakah analisis yang paling tepat?',
+                options: [
+                    'A. Teks B lebih tepat karena menggunakan kalimat pasif formal',
+                    'B. Teks A lebih efektif sebagai teks prosedur karena menggunakan kalimat imperatif dan konjungsi temporal yang lugas',
+                    'C. Kedua teks sama-sama tidak efektif',
+                    'D. Teks B lebih mudah dipahami oleh anak-anak'
+                ],
+                answer: 1,
+                rationale: 'Teks A lebih interaktif dan lugas menggunakan perintah langsung, sangat cocok untuk format petunjuk aksi.'
+            },
+            {
+                id: 22,
+                points: 5,
+                type: 'IS',
+                typeName: 'Isian Singkat',
+                question: 'Bagian penutup teks prosedur yang berisi harapan atau simpulan manfaat jika petunjuk diikuti dinamakan bagian ______.',
+                acceptedAnswers: ['penutup', 'penegasan ulang', 'simpulan', 'kesimpulan'],
+                rationale: 'Bagian penutup menekankan keutamaan manfaat atau ucapan selamat menikmati hasil kegiatan.'
+            },
+            {
+                id: 23,
+                points: 4,
+                type: 'PGK',
+                typeName: 'PG Kompleks',
+                question: 'Manakah di bawah ini yang merupakan contoh KONJUNGSI TEMPORAL yang sering ditemukan dalam teks prosedur? (Centang semua yang tepat)',
+                options: [
+                    'Selanjutnya',
+                    'Setelah itu',
+                    'Karena',
+                    'Kemudian'
+                ],
+                correctIndices: [0, 1, 3],
+                rationale: '"Selanjutnya", "setelah itu", dan "kemudian" menyatakan urutan kronologis waktu.'
+            },
+            {
+                id: 24,
+                points: 3,
+                type: 'PG',
+                typeName: 'PG Biasa',
+                question: 'Analisis Kasus: Petunjuk alat pemadam api (APAR) menuliskan: "(1) Semprotkan ke api -> (2) Cabut pin pengaman -> (3) Arahkan selang." Bahaya utama jika penggguna mengikuti urutan salah tersebut adalah...',
+                options: [
+                    'A. Gas pemadam berbau menyengat',
+                    'B. APAR tidak dapat berfungsi/terkunci karena pin pengaman belum dicabut di awal',
+                    'C. Suara alarm gedung langsung berbunyi keras',
+                    'D. Selang APAR akan terlepas'
+                ],
+                answer: 1,
+                rationale: 'Mencabut pin pengaman adalah syarat utama secara mekanis agar tuas pemicu APAR dapat ditekan.'
+            },
+            {
+                id: 25,
+                points: 5,
+                type: 'IS',
+                typeName: 'Isian Singkat',
+                question: 'Jenis teks prosedur yang menjelaskan langkah-langkah dalam menjalankan perangkat atau aplikasi teknologi dinamakan prosedur cara ______ alat.',
+                acceptedAnswers: ['menggunakan', 'mengoperasikan', 'memakai', 'mengoperasikan/menggunakan'],
+                rationale: 'Prosedur mengoperasikan/menggunakan menjelaskan langkah pemakaian alat atau perangkat.'
+            }
+        ];
+
+        // Total Maximum Score Calculation (Exactly 100 Points)
+        const TOTAL_MAX_POINTS = questionDatabase.reduce((sum, q) => sum + q.points, 0);
+        const TOTAL_DURATION_SECONDS = 40 * 60; // 40 Menit (2400 detik)
+
+        // Game State
+        let totalScore = 0; // Cumulative score earned
+        let openedCount = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let openedBoxes = new Set();
+        let boxResults = {}; // Map: qId -> { isCorrect, scoreEarned }
+        let currentActiveQuestion = null;
+        
+        // Input state trackers
+        let selectedPGBiasaIndex = null;
+        let selectedPGKIndices = new Set();
+        let selectedMatchingAnswers = {};
+
+        let gameHistory = []; // History array for PDF export
+        
+        // Student Info State
+        let studentName = '';
+        let studentClass = '';
+
+        // Timer State
+        let timeLeft = TOTAL_DURATION_SECONDS;
+        let timerInterval = null;
+        let isTimeUp = false;
+
+        // Global AudioContext for Safari / iOS Compatibility
+        let audioCtx = null;
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Sound Player function using Web Audio API with Safari resilience
+        function playSound(type) {
+            try {
+                initAudioContext();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3); // A5
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3); // A2
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log('Audio Context notice:', e);
+            }
+        }
+
+        // Init App with Safari interaction listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGrid();
+            updateStatsUI();
+            startCountdownTimer();
+
+            // Unlock Web Audio API on first user interaction for Safari/iOS
+            const unlockAudio = () => {
+                initAudioContext();
+                document.removeEventListener('click', unlockAudio);
+                document.removeEventListener('touchstart', unlockAudio);
+            };
+            document.addEventListener('click', unlockAudio, { once: true });
+            document.addEventListener('touchstart', unlockAudio, { once: true });
+        });
+
+        // Sync Student Identity
+        function syncStudentInfo() {
+            studentName = document.getElementById('header-student-name').value.trim();
+            studentClass = document.getElementById('header-student-class').value.trim();
+            document.getElementById('modal-student-name').value = studentName;
+            document.getElementById('modal-student-class').value = studentClass;
+        }
+
+        function syncStudentInfoFromModal() {
+            studentName = document.getElementById('modal-student-name').value.trim();
+            studentClass = document.getElementById('modal-student-class').value.trim();
+            document.getElementById('header-student-name').value = studentName;
+            document.getElementById('header-student-class').value = studentClass;
+        }
+
+        // Countdown Timer Engine (40 Minutes)
+        function startCountdownTimer() {
+            clearInterval(timerInterval);
+            timeLeft = TOTAL_DURATION_SECONDS;
+            isTimeUp = false;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    isTimeUp = true;
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(seconds).padStart(2, '0');
+            
+            const timerDisplayEl = document.getElementById('timer-display');
+            const timerContainerEl = document.getElementById('timer-container');
+
+            timerDisplayEl.innerText = `${formattedMinutes}:${formattedSeconds}`;
+
+            if (timeLeft <= 300) {
+                timerContainerEl.classList.add('border-red-500', 'bg-red-950/40', 'animate-pulse-fast');
+                timerDisplayEl.classList.add('text-red-400');
+            } else {
+                timerContainerEl.classList.remove('border-red-500', 'bg-red-950/40', 'animate-pulse-fast');
+                timerDisplayEl.classList.remove('text-red-400');
+            }
+        }
+
+        function handleTimeOut() {
+            playSound('wrong');
+            closeModal();
+            document.getElementById('victory-title-text').innerText = '⏰ WAKTU UJIAN HABIS!';
+            document.getElementById('victory-sub-text').innerText = 'Waktu 40 menit telah selesai. Berikut adalah hasil capaian Anda.';
+            showVictoryModal();
+        }
+
+        function getTimeUsedFormatted() {
+            const secondsUsed = TOTAL_DURATION_SECONDS - timeLeft;
+            const minutes = Math.floor(secondsUsed / 60);
+            const seconds = secondsUsed % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // Render 5x5 Mystery Grid
+        function renderGrid() {
+            const gridEl = document.getElementById('box-grid');
+            gridEl.innerHTML = '';
+
+            questionDatabase.forEach((q) => {
+                const isOpened = openedBoxes.has(q.id);
+                const result = boxResults[q.id];
+
+                let typeBadge = '';
+                let borderTheme = 'border-slate-700/60';
+
+                if (q.type === 'PG') { typeBadge = '🅰️ PG Biasa'; borderTheme = 'border-indigo-500/40'; }
+                else if (q.type === 'PGK') { typeBadge = '☑️ PG Kompleks'; borderTheme = 'border-emerald-500/40'; }
+                else if (q.type === 'MJD') { typeBadge = '🔀 Menjodohkan'; borderTheme = 'border-cyan-500/40'; }
+                else if (q.type === 'IS') { typeBadge = '✏️ Isian Singkat'; borderTheme = 'border-amber-500/40'; }
+                else if (q.type === 'UR') { typeBadge = '📝 Uraian HOTS'; borderTheme = 'border-purple-500/40'; }
+
+                const card = document.createElement('div');
+                card.className = `box-card p-3.5 rounded-xl glass-card flex flex-col justify-between cursor-pointer border relative overflow-hidden ${
+                    isOpened || isTimeUp ? 'disabled opacity-90 bg-slate-900/90 border-slate-800 cursor-not-allowed' : `hover:border-indigo-400 ${borderTheme}`
+                }`;
+
+                // Status display if opened
+                let scoreStatusHtml = '';
+                if (isOpened && result) {
+                    if (result.isCorrect) {
+                        scoreStatusHtml = `
+                            <div class="my-2 text-center py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40">
+                                <div class="text-xl font-black text-emerald-400">+${result.scoreEarned} POIN</div>
+                                <div class="text-[9px] text-emerald-300 font-bold uppercase"><i class="fa-solid fa-circle-check"></i> Jawaban Benar</div>
+                            </div>
+                        `;
+                    } else {
+                        scoreStatusHtml = `
+                            <div class="my-2 text-center py-1 rounded-lg bg-red-950/60 border border-red-500/40">
+                                <div class="text-xl font-black text-red-400">0 POIN</div>
+                                <div class="text-[9px] text-red-300 font-bold uppercase"><i class="fa-solid fa-circle-xmark"></i> Jawaban Salah</div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    scoreStatusHtml = `
+                        <div class="my-3 text-center">
+                            <div class="text-2xl font-black text-amber-400 tracking-tight">
+                                ${q.points} <span class="text-xs font-semibold text-slate-300">POIN</span>
+                            </div>
+                            <div class="text-[9px] text-slate-400 font-semibold tracking-wider uppercase">BOBOT SKOR KOTAK</div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-black uppercase text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded border border-indigo-500/30">
+                            #${q.id}
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
+                            ${typeBadge}
+                        </span>
+                    </div>
+
+                    ${scoreStatusHtml}
+
+                    <div class="text-center pt-2 border-t border-slate-800/80">
+                        ${isOpened 
+                            ? `<span class="text-[11px] font-bold text-slate-400"><i class="fa-solid fa-lock"></i> Selesai</span>`
+                            : `<span class="text-[11px] font-bold text-indigo-300 hover:text-white"><i class="fa-solid fa-box-open"></i> Buka Kotak</span>`
+                        }
+                    </div>
+                `;
+
+                if (!isOpened && !isTimeUp) {
+                    card.onclick = () => openQuestionModal(q);
+                }
+
+                gridEl.appendChild(card);
+            });
+        }
+
+        // Open Question Modal
+        function openQuestionModal(questionObj) {
+            if (isTimeUp) return;
+
+            currentActiveQuestion = questionObj;
+            selectedPGBiasaIndex = null;
+            selectedPGKIndices.clear();
+            selectedMatchingAnswers = {};
+
+            document.getElementById('question-box-number').innerText = `KOTAK MISTERI #${questionObj.id}`;
+            document.getElementById('question-points-badge').innerText = `BOBOT: ${questionObj.points} POIN`;
+            document.getElementById('question-text').innerText = questionObj.question;
+
+            // Reset Result & AI Feedback
+            document.getElementById('result-feedback').classList.add('hidden');
+            document.getElementById('ai-evaluation-report').classList.add('hidden');
+            document.getElementById('btn-submit-answer').classList.remove('hidden');
+            document.getElementById('btn-close-modal').classList.add('hidden');
+
+            const answerContainer = document.getElementById('answer-container');
+            answerContainer.innerHTML = '';
+
+            const iconEl = document.getElementById('question-type-icon');
+            const titleEl = document.getElementById('question-type-title');
+
+            // Render form components according to Dinas Pendidikan exam standards
+            if (questionObj.type === 'PG') {
+                iconEl.innerText = '🅰️';
+                titleEl.innerText = 'Pilihan Ganda Biasa (Pilih 1 Opsi Tepat)';
+                
+                const optsDiv = document.createElement('div');
+                optsDiv.className = 'grid grid-cols-1 gap-2.5';
+                
+                questionObj.options.forEach((optText, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'pg-option-btn w-full text-left p-3.5 rounded-xl bg-slate-900/80 hover:bg-indigo-600/20 border border-slate-800 hover:border-indigo-500/50 text-xs sm:text-sm text-slate-200 transition flex items-center gap-3';
+                    btn.innerHTML = `<span class="w-6 h-6 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-indigo-400 text-xs border border-slate-700">${String.fromCharCode(65+idx)}</span> <span>${optText.substring(3)}</span>`;
+                    btn.onclick = () => selectPGBiasaOption(idx);
+                    optsDiv.appendChild(btn);
+                });
+                answerContainer.appendChild(optsDiv);
+
+            } else if (questionObj.type === 'PGK') {
+                iconEl.innerText = '☑️';
+                titleEl.innerText = 'Pilihan Ganda Kompleks (Centang Semua Opsi Benar)';
+
+                const pgkDiv = document.createElement('div');
+                pgkDiv.className = 'space-y-2.5';
+
+                questionObj.options.forEach((optText, idx) => {
+                    const boxBtn = document.createElement('div');
+                    boxBtn.className = 'pgk-checkbox-card p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center gap-3 cursor-pointer hover:border-emerald-500/50 transition';
+                    boxBtn.onclick = () => togglePGKOption(idx, boxBtn);
+                    
+                    boxBtn.innerHTML = `
+                        <input type="checkbox" id="pgk-check-${idx}" class="w-4 h-4 text-emerald-500 rounded border-slate-700 bg-slate-800 focus:ring-0 pointer-events-none">
+                        <label class="text-xs sm:text-sm text-slate-200 pointer-events-none cursor-pointer">${optText}</label>
+                    `;
+                    pgkDiv.appendChild(boxBtn);
+                });
+
+                answerContainer.appendChild(pgkDiv);
+
+            } else if (questionObj.type === 'MJD') {
+                iconEl.innerText = '🔀';
+                titleEl.innerText = 'Soal Menjodohkan (Pasangkan Setiap Pernyataan)';
+
+                const mjdDiv = document.createElement('div');
+                mjdDiv.className = 'space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800';
+
+                questionObj.pairs.forEach((pair, idx) => {
+                    const pairRow = document.createElement('div');
+                    pairRow.className = 'flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-slate-800/80 rounded-lg border border-slate-700/60';
+                    
+                    let selectOptionsHtml = `<option value="">-- Pilih Pasangan --</option>`;
+                    questionObj.allOptions.forEach(opt => {
+                        selectOptionsHtml += `<option value="${opt}">${opt}</option>`;
+                    });
+
+                    pairRow.innerHTML = `
+                        <div class="text-xs sm:text-sm font-semibold text-slate-200 sm:w-1/2">
+                            <span class="text-cyan-400 mr-1">${idx+1}.</span> ${pair.prompt}
+                        </div>
+                        <div class="sm:w-1/2">
+                            <select onchange="updateMatchingAnswer(${idx}, this.value)" class="w-full p-2 bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg focus:outline-none focus:border-cyan-500">
+                                ${selectOptionsHtml}
+                            </select>
+                        </div>
+                    `;
+                    mjdDiv.appendChild(pairRow);
+                });
+
+                answerContainer.appendChild(mjdDiv);
+
+            } else if (questionObj.type === 'IS') {
+                iconEl.innerText = '✏️';
+                titleEl.innerText = 'Isian Singkat (Ketik Kata / Istilah Kunci)';
+
+                answerContainer.innerHTML = `
+                    <div class="space-y-2">
+                        <label class="text-xs text-slate-400">Ketik jawaban Anda di bawah ini:</label>
+                        <input type="text" id="short-answer-input" placeholder="Ketik kata/istilah penjelas di sini..." 
+                            class="w-full p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:border-amber-500">
+                        <span class="text-[10px] text-slate-500 italic">*Sistem pemeriksa otomatis toleran terhadap huruf besar/kecil.</span>
+                    </div>
+                `;
+
+            } else if (questionObj.type === 'UR') {
+                iconEl.innerText = '📝';
+                titleEl.innerText = 'Uraian HOTS (Evaluasi Rubrik AI)';
+
+                answerContainer.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs text-slate-400">
+                            <span>Ketik analisis / penjelasan komprehensif Anda:</span>
+                            <span id="char-counter" class="text-slate-500">0 karakter</span>
+                        </div>
+                        <textarea id="essay-answer-input" rows="4" oninput="updateCharCounter(this)" placeholder="Tuliskan jawaban penjelasan Anda secara rinci, terstruktur, dan logis..."
+                            class="w-full p-3.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-100 text-sm focus:outline-none focus:border-purple-500 leading-relaxed"></textarea>
+                        <div class="p-2.5 rounded-lg bg-purple-950/30 border border-purple-800/40 text-[11px] text-purple-300">
+                            <i class="fa-solid fa-robot"></i> <strong>Sistem Penilaian AI:</strong> Jawaban dinilai berdasarkan Ketepatan Isi, Pemahaman Konsep, Kelengkapan Unsur, dan Alasan Logis (Batas Lulus ≥ 70%).
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('question-modal').classList.remove('hidden');
+        }
+
+        // Selection Handlers
+        function selectPGBiasaOption(idx) {
+            selectedPGBiasaIndex = idx;
+            const btns = document.querySelectorAll('.pg-option-btn');
+            btns.forEach((b, i) => {
+                if (i === idx) {
+                    b.classList.add('bg-indigo-600/30', 'border-indigo-500', 'ring-2', 'ring-indigo-500/50');
+                } else {
+                    b.classList.remove('bg-indigo-600/30', 'border-indigo-500', 'ring-2', 'ring-indigo-500/50');
+                }
+            });
+        }
+
+        function togglePGKOption(idx, el) {
+            const chk = document.getElementById(`pgk-check-${idx}`);
+            if (selectedPGKIndices.has(idx)) {
+                selectedPGKIndices.delete(idx);
+                chk.checked = false;
+                el.classList.remove('bg-emerald-950/50', 'border-emerald-500', 'ring-1', 'ring-emerald-500');
+            } else {
+                selectedPGKIndices.add(idx);
+                chk.checked = true;
+                el.classList.add('bg-emerald-950/50', 'border-emerald-500', 'ring-1', 'ring-emerald-500');
+            }
+        }
+
+        function updateMatchingAnswer(pairIdx, val) {
+            selectedMatchingAnswers[pairIdx] = val;
+        }
+
+        function updateCharCounter(el) {
+            document.getElementById('char-counter').innerText = `${el.value.length} karakter`;
+        }
+
+        // Submit Current Answer Logic
+        function submitCurrentAnswer() {
+            if (!currentActiveQuestion) return;
+
+            const q = currentActiveQuestion;
+            let isCorrect = false;
+            let userProvidedAnswerText = '';
+
+            // 1. Pilihan Ganda Biasa Check
+            if (q.type === 'PG') {
+                if (selectedPGBiasaIndex === null) {
+                    alert('Harap pilih salah satu opsi jawaban terlebih dahulu!');
+                    return;
+                }
+                isCorrect = (selectedPGBiasaIndex === q.answer);
+                userProvidedAnswerText = q.options[selectedPGBiasaIndex];
+            } 
+            // 2. Pilihan Ganda Kompleks Check
+            else if (q.type === 'PGK') {
+                if (selectedPGKIndices.size === 0) {
+                    alert('Harap centang setidaknya satu opsi jawaban!');
+                    return;
+                }
+                const userArray = Array.from(selectedPGKIndices).sort();
+                const correctArray = [...q.correctIndices].sort();
+
+                isCorrect = userArray.length === correctArray.length && 
+                            userArray.every((val, idx) => val === correctArray[idx]);
+
+                userProvidedAnswerText = userArray.map(i => q.options[i]).join('; ');
+            }
+            // 3. Menjodohkan Check
+            else if (q.type === 'MJD') {
+                const totalPairs = q.pairs.length;
+                let correctPairsCount = 0;
+                let userSummary = [];
+
+                for (let i = 0; i < totalPairs; i++) {
+                    const userVal = selectedMatchingAnswers[i] || '';
+                    const targetVal = q.pairs[i].match;
+                    userSummary.push(`${q.pairs[i].prompt} ➔ ${userVal || '(Belum dijawab)'}`);
+
+                    if (userVal === targetVal) {
+                        correctPairsCount++;
+                    }
+                }
+
+                if (Object.keys(selectedMatchingAnswers).length < totalPairs) {
+                    alert('Harap jodohkan seluruh pasangan yang tersedia!');
+                    return;
+                }
+
+                isCorrect = (correctPairsCount === totalPairs);
+                userProvidedAnswerText = userSummary.join(' | ');
+            }
+            // 4. Isian Singkat Check
+            else if (q.type === 'IS') {
+                const inputEl = document.getElementById('short-answer-input');
+                const rawVal = inputEl.value.trim().toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
+                
+                if (!rawVal) {
+                    alert('Harap isi kolom jawaban!');
+                    return;
+                }
+
+                isCorrect = q.acceptedAnswers.some(ans => {
+                    const cleanAns = ans.toLowerCase().trim().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
+                    return rawVal.includes(cleanAns) || cleanAns.includes(rawVal);
+                });
+                userProvidedAnswerText = inputEl.value;
+            } 
+            // 5. Uraian HOTS Check (AI Evaluator)
+            else if (q.type === 'UR') {
+                const textVal = document.getElementById('essay-answer-input').value.trim();
+                if (textVal.length < 10) {
+                    alert('Harap berikan jawaban penjelasan yang lebih lengkap (minimal 10 karakter)!');
+                    return;
+                }
+
+                const evalResult = evaluateEssayAI(textVal, q);
+                isCorrect = evalResult.scorePercentage >= 70; // 70% passing mark
+                userProvidedAnswerText = textVal;
+                
+                // Display AI Evaluation Report
+                document.getElementById('ai-evaluation-report').classList.remove('hidden');
+                document.getElementById('ai-score-percentage').innerText = `${evalResult.scorePercentage}%`;
+                document.getElementById('score-isi').innerText = `${evalResult.scores.isi}%`;
+                document.getElementById('score-konsep').innerText = `${evalResult.scores.konsep}%`;
+                document.getElementById('score-kelengkapan').innerText = `${evalResult.scores.kelengkapan}%`;
+                document.getElementById('score-alasan').innerText = `${evalResult.scores.alasan}%`;
+                document.getElementById('ai-feedback-text').innerText = evalResult.feedback;
+
+                q.lastEvaluation = evalResult;
+            }
+
+            // Update Box State & Score
+            openedBoxes.add(q.id);
+            openedCount++;
+
+            const pointsEarned = isCorrect ? q.points : 0;
+            boxResults[q.id] = {
+                isCorrect: isCorrect,
+                scoreEarned: pointsEarned
+            };
+
+            gameHistory.push({
+                boxId: q.id,
+                type: q.type,
+                typeName: q.typeName,
+                points: q.points,
+                question: q.question,
+                userAnswer: userProvidedAnswerText,
+                isCorrect: isCorrect,
+                scoreEarned: pointsEarned,
+                rationale: q.rationale,
+                aiEvaluation: q.type === 'UR' ? q.lastEvaluation : null
+            });
+
+            const resultBox = document.getElementById('result-feedback');
+            const resultTitle = document.getElementById('result-title');
+            const resultPoints = document.getElementById('result-points-change');
+            const resultRationale = document.getElementById('result-rationale');
+
+            resultBox.classList.remove('hidden', 'bg-emerald-950/80', 'border-emerald-700', 'bg-red-950/80', 'border-red-700');
+
+            if (isCorrect) {
+                totalScore += q.points;
+                correctCount++;
+                playSound('correct');
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+
+                resultBox.classList.add('bg-emerald-950/80', 'border', 'border-emerald-700/60');
+                resultTitle.className = 'font-extrabold text-lg text-emerald-400';
+                resultTitle.innerText = '🎉 JAWABAN BENAR!';
+                resultPoints.className = 'text-sm font-bold text-emerald-300';
+                resultPoints.innerText = `+${q.points} POIN BERHASIL DIDAPATKAN`;
+            } else {
+                wrongCount++;
+                playSound('wrong');
+
+                resultBox.classList.add('bg-red-950/80', 'border', 'border-red-700/60');
+                resultTitle.className = 'font-extrabold text-lg text-red-400';
+                resultTitle.innerText = '❌ JAWABAN KURANG TEPAT!';
+                resultPoints.className = 'text-sm font-bold text-red-300';
+                resultPoints.innerText = `0 POIN (Bobot Kotak: ${q.points} Poin)`;
+            }
+
+            resultRationale.innerText = `💡 Penjelasan / kunci: ${q.rationale}`;
+
+            document.getElementById('btn-submit-answer').classList.add('hidden');
+            document.getElementById('btn-close-modal').classList.remove('hidden');
+
+            updateStatsUI();
+            renderGrid();
+        }
+
+        // AI Essay Rubric Evaluation Engine
+        function evaluateEssayAI(userText, questionObj) {
+            const lowerText = userText.toLowerCase();
+            const keywords = questionObj.keywords || [];
+            
+            let matchedCount = 0;
+            keywords.forEach(kw => {
+                if (lowerText.includes(kw.toLowerCase())) {
+                    matchedCount++;
+                }
+            });
+
+            const matchRatio = keywords.length > 0 ? (matchedCount / keywords.length) : 0.8;
+            const lengthBonus = Math.min(userText.length / 80, 1.0);
+
+            let isiScore = Math.min(Math.round((matchRatio * 70) + (lengthBonus * 30)), 100);
+            let konsepScore = Math.min(Math.round((matchRatio * 80) + 20), 100);
+            let kelengkapanScore = Math.min(Math.round((matchRatio * 60) + (lengthBonus * 40)), 100);
+            let alasanScore = Math.min(Math.round((matchRatio * 75) + 25), 100);
+
+            let finalPercentage = Math.round((isiScore * 0.3) + (konsepScore * 0.3) + (kelengkapanScore * 0.2) + (alasanScore * 0.2));
+
+            let feedback = '';
+            if (finalPercentage >= 85) {
+                feedback = 'Luar biasa! Analisis Anda sangat terstruktur, memuat istilah kunci dan argumen logis yang tepat.';
+            } else if (finalPercentage >= 70) {
+                feedback = 'Bagus! Jawaban Anda memenuhi kriteria kelulusan standar Dinas Pendidikan.';
+            } else if (finalPercentage >= 50) {
+                feedback = 'Jawaban cukup baik namun kurang mencakup beberapa istilah kunci utama teks prosedur.';
+            } else {
+                feedback = 'Jawaban terlalu singkat atau belum menyentuh substansi materi yang ditanyakan.';
+            }
+
+            return {
+                scorePercentage: finalPercentage,
+                scores: {
+                    isi: isiScore,
+                    konsep: konsepScore,
+                    kelengkapan: kelengkapanScore,
+                    alasan: alasanScore
+                },
+                feedback: feedback
+            };
+        }
+
+        // Close Question Modal
+        function closeModal() {
+            document.getElementById('question-modal').classList.add('hidden');
+            currentActiveQuestion = null;
+
+            if (openedCount >= questionDatabase.length && !isTimeUp) {
+                clearInterval(timerInterval);
+                document.getElementById('victory-title-text').innerText = '🏆 Sesi Ujian Selesai!';
+                document.getElementById('victory-sub-text').innerText = 'Seluruh 25 kotak misteri telah diselesaikan.';
+                showVictoryModal();
+            }
+        }
+
+        // Update Header UI
+        function updateStatsUI() {
+            document.getElementById('converted-score').innerText = totalScore;
+            document.getElementById('progress-text').innerText = `${openedCount} / ${questionDatabase.length}`;
+        }
+
+        // Rules Modal Controls
+        function openRulesModal() {
+            document.getElementById('rules-modal').classList.remove('hidden');
+        }
+        function closeRulesModal() {
+            document.getElementById('rules-modal').classList.add('hidden');
+        }
+
+        // Reset Game Confirm
+        function resetGameConfirm() {
+            if (confirm('Apakah Anda yakin ingin mengulang ujian dari awal? Timer 40 menit dan skor akan di-reset.')) {
+                resetGame();
+            }
+        }
+
+        function resetGame() {
+            totalScore = 0;
+            openedCount = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            openedBoxes.clear();
+            boxResults = {};
+            gameHistory = [];
+            
+            document.getElementById('victory-modal').classList.add('hidden');
+            updateStatsUI();
+            startCountdownTimer();
+            renderGrid();
+        }
+
+        function downloadPDFReport() {
+            syncStudentInfoFromModal();
+
+            const nameInput = studentName || 'Siswa IX';
+            const classInput = studentClass || 'IX';
+            const currentDate = new Date().toLocaleDateString('id-ID', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            let rank = 'Pemula Teks Prosedur';
+            if (totalScore >= 88) rank = '👑 SANGAT BAIK / A (Master Teks Prosedur)';
+            else if (totalScore >= 75) rank = '🌟 BAIK / B (Pakar Teks Prosedur)';
+            else if (totalScore >= 60) rank = '👍 CUKUP / C (Pejuang Teks Prosedur)';
+            else rank = '📚 PERLU Bimbingan / D';
+
+            const pdfContainer = document.getElementById('pdf-report-template');
+
+            // Constructing PDF Breakdown Rows
+            let rowsHtml = '';
+            gameHistory.forEach((item, index) => {
+                let rubricInfo = '';
+                if (item.type === 'UR' && item.aiEvaluation) {
+                    rubricInfo = `
+                        <div style="margin-top: 4px; padding: 4px 6px; background-color: #f3e8ff; border-radius: 4px; font-size: 10px; color: #6b21a8;">
+                            <b>Nilai Evaluasi AI: ${item.aiEvaluation.scorePercentage}%</b> (Isi: ${item.aiEvaluation.scores.isi}%, Konsep: ${item.aiEvaluation.scores.konsep}%, Kelengkapan: ${item.aiEvaluation.scores.kelengkapan}%, Alasan: ${item.aiEvaluation.scores.alasan}%)<br/>
+                            <i>Feedback: ${item.aiEvaluation.feedback}</i>
+                        </div>
+                    `;
+                }
+
+                rowsHtml += `
+                    <tr style="border-bottom: 1px solid #e2e8f0; ${index % 2 === 0 ? 'background-color: #f8fafc;' : ''}">
+                        <td style="padding: 8px; text-align: center; font-weight: bold;">#${item.boxId}</td>
+                        <td style="padding: 8px;">
+                            <span style="font-weight: bold; color: #4f46e5;">[${item.typeName} - ${item.points} Poin]</span><br/>
+                            ${item.question}
+                            ${rubricInfo}
+                        </td>
+                        <td style="padding: 8px; word-break: break-word;">${item.userAnswer}</td>
+                        <td style="padding: 8px; text-align: center; font-weight: bold; color: ${item.isCorrect ? '#16a34a' : '#dc2626'};">
+                            ${item.isCorrect ? 'BENAR' : 'SALAH'}<br/>
+                            <span style="font-size: 10px;">(+${item.scoreEarned} / ${item.points} Poin)</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            pdfContainer.innerHTML = `
+                <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; color: #0f172a; width: 750px; margin: 0 auto; background: #ffffff;">
+                    <!-- PDF Header -->
+                    <div style="border-bottom: 2px solid #4f46e5; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="font-size: 16px; font-weight: bold; color: #4f46e5; margin: 0;">LAPORAN HASIL ASESMEN KOTAK MISTERI</h1>
+                            <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Bahasa Indonesia Kelas IX • Standar Dinas Pendidikan (40 Menit)</p>
+                        </div>
+                        <div style="text-align: right; font-size: 10px; color: #64748b;">
+                            Tanggal: ${currentDate}
+                        </div>
+                    </div>
+
+                    <!-- Student Identity & Summary Box -->
+                    <div style="background-color: #f1f5f9; border-radius: 8px; padding: 12px; margin-bottom: 16px; display: flex; justify-content: space-between;">
+                        <div style="font-size: 11px; line-height: 1.6;">
+                            <p style="margin: 0;"><b>Nama Siswa:</b> ${nameInput}</p>
+                            <p style="margin: 0;"><b>Kelas / No. Absen:</b> ${classInput}</p>
+                            <p style="margin: 0;"><b>Waktu Digunakan:</b> ${getTimeUsedFormatted()} / 40:00</p>
+                            <p style="margin: 0;"><b>Predikat Capaian:</b> <span style="color: #4f46e5; font-weight: bold;">${rank}</span></p>
+                        </div>
+                        <div style="text-align: right; font-size: 11px; line-height: 1.6;">
+                            <p style="margin: 0;"><b>TOTAL NILAI AKHIR:</b></p>
+                            <p style="margin: 0; font-size: 24px; font-weight: bold; color: #d97706;">${totalScore} / 100 POIN</p>
+                            <p style="margin: 0; color: #16a34a; font-size: 10px;">Benar: ${correctCount} Kotak | Salah: ${wrongCount} Kotak</p>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown Table -->
+                    <h2 style="font-size: 12px; font-weight: bold; margin-bottom: 8px; color: #334155;">Rincian Pengerjaan Kotak Misteri:</h2>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 10px; border: 1px solid #cbd5e1;">
+                        <thead>
+                            <tr style="background-color: #334155; color: #ffffff;">
+                                <th style="padding: 8px; width: 8%;">Box</th>
+                                <th style="padding: 8px; width: 47%;">Pertanyaan & Tipe Soal</th>
+                                <th style="padding: 8px; width: 30%;">Jawaban Siswa</th>
+                                <th style="padding: 8px; width: 15%;">Hasil Skor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml.length > 0 ? rowsHtml : '<tr><td colspan="4" style="padding: 12px; text-align: center;">Belum ada soal yang dijawab.</td></tr>'}
+                        </tbody>
+                    </table>
+
+                    <!-- Footer Note -->
+                    <div style="margin-top: 20px; font-size: 9px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                        Berkas ini merupakan Laporan Hasil Belajar Mandiri berbasis Media Game Edukasi Interaktif Kelas IX Bahasa Indonesia.
+                    </div>
+                </div>
+            `;
+
+            // Cross-browser HTML2PDF export settings
+            const opt = {
+                margin:       [8, 8, 8, 8],
+                filename:     `Laporan_Asesmen_Teks_Prosedur_${nameInput.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(pdfContainer).save();
+        }
+
+        // Victory Modal
+        function showVictoryModal() {
+            document.getElementById('final-converted-score').innerText = totalScore;
+            document.getElementById('final-correct').innerText = correctCount;
+            document.getElementById('final-wrong').innerText = wrongCount;
+            document.getElementById('final-time-used').innerText = `Waktu Digunakan: ${getTimeUsedFormatted()} dari 40:00`;
+
+            let rank = 'Pemula Teks Prosedur';
+            if (totalScore >= 88) rank = '👑 SANGAT BAIK / A (Master Teks Prosedur)';
+            else if (totalScore >= 75) rank = '🌟 BAIK / B (Pakar Teks Prosedur)';
+            else if (totalScore >= 60) rank = '👍 CUKUP / C (Pejuang Teks Prosedur)';
+            else rank = '📚 PERLU Bimbingan / D';
+
+            document.getElementById('final-rank').innerText = `Predikat: ${rank}`;
+            
+            document.getElementById('modal-student-name').value = studentName;
+            document.getElementById('modal-student-class').value = studentClass;
+
+            document.getElementById('victory-modal').classList.remove('hidden');
+            confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
+        }
+    </script>
+</body>
+</html>
